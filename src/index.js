@@ -75,10 +75,25 @@ const App = {
     $('#num2').text(num2);
     $('#quastion').show();
     document.querySelector('#answer').focus();
+
+    // 시작을 클리하면 바로 타이머 시작
+    this.showTimer();
   },
 
   submitAnswer: async function () {
-
+    const result = sessionStorage.getItem('result');
+    var answer = $('#answer').val();
+    if (answer === result) {
+      if (confirm("대단하네요 0.1 KLAY 받기")) {
+        if (await this.callContractBalance() >= 0.1) {
+          this.receiveKlay();
+        } else {
+          alert("죄송합니다. 컨트랙의 KLAY가 다 소모되었습니다.")
+        }
+      } 
+    } else {
+      alert ("시간초과 입니다.")
+    }
   },
 
   deposit: async function () {
@@ -171,7 +186,20 @@ const App = {
   },
 
   showTimer: function () {
-
+    //3초가 지나면 문제가 안보이고 다시 시작버튼이 보이도록.
+    var seconds = 3;
+    $('#timer').text(seconds);
+    //1초 간격으로 설정
+    var interval = setInterval(() => {
+      $('#timer').text(--seconds);
+      if (seconds <= 0) {
+        $('#timer').text('');
+        $('#answer').val('');
+        $('#question').hide();
+        $('#start').show();
+        clearInterval(interval);
+      }
+    }, 1000);
   },
 
   showSpinner: function () {
@@ -180,7 +208,26 @@ const App = {
   },
 
   receiveKlay: function () {
+    var spinner = this.showSpinner();
+    const walletInstance = this.getWallet();
 
+    if (walletInstance) return ;
+    agContract.methods.transfer(cav.utils.toPad("0.1", "KLAY")).send({
+      from: walletInstance.address,
+      gas: '250000'
+    }).then(function (receipt) {
+      if (receipt.status) {
+        spinner.stop();
+        alert("0.1 KLAY가" + walletInstance.address + "계정으로 지급되었습니다.");
+        $('#transaction').heml("");
+        $('#transaction').append(`<p><a href='https://baobab.klaytnscope.com/tx/${receipt.txHash}' target='_blank'>클레이튼 Scope에서 트랜잭션 확인</a></p>`);
+        return agContract.methods.getBalance().call()
+            .then(function (balance) {
+              $('#contractBalance').html("");
+              $('#contractBalance').append('<p>' + '이벤트 잔액 : ' + cav.utils.fromPad(balance, "KLAY") + "KLAY" + '</p>');
+            })
+      }
+    })
   }
 };
 
