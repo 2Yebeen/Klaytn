@@ -1,5 +1,5 @@
 import Caver from "caver-js";
-
+import {Spinner} from "spin.js";
 const config = {
   rpcURL: 'httpL//qpi.baobab.klaytn.net:8651'
 }
@@ -73,6 +73,7 @@ const App = {
   },
 
   deposit: async function () {
+    var spinner = this.showSpinner();
     // 송금 하기 전 오너 정보인지 확인
     const walletInstance = this.getWallet();
     if (walletInstance) {
@@ -90,6 +91,9 @@ const App = {
           })
           .once('receipt', (receipt) => {
             console.log(`(#${receipt.blockNumber})`, reseipt);
+            spinner.stop();
+            alert(amount + "KLAY 를 컨트랙으로 송금했습니다.");
+            location.reload();
           })
           .once('error', (error) => {
             alert(error.message);
@@ -105,7 +109,7 @@ const App = {
   },
 
   callContractBalance: async function () {
-
+    return await agContract.methods.getBalance().call();
   },
 
   getWallet: function () {
@@ -142,6 +146,11 @@ const App = {
     $('#login').hide();
     $('#logout').show();
     $('#address').append('<br />' + '<p>' + '내 계정 주소: ' + walletInstance + '</p>');
+    // 잔액을 klay로 변환한다.
+    $('#contractBalance').append('<p>' + '이벤트 잔액: ' + cav.utils.fromPad(await this.callContractBalance(), "KLAY") +'KLAY' + '</p>');
+    if (await this.callOwner() == walletInstance.address) {
+      $('#owner').show();
+    }
   },
 
   removeWallet: function () {
@@ -156,7 +165,8 @@ const App = {
   },
 
   showSpinner: function () {
-
+    var target = document.getElementById("spin");
+    return new Spinner(opts).spin(target);
   },
 
   receiveKlay: function () {

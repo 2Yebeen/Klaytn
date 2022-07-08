@@ -85,3 +85,15 @@ truffle deploy --network klaytn
 ##### 계정 인증
 
 keystock파일과 비밀번호 인증을 통해 로그인
+
+
+##### 재배포
+
+```
+truffle deploy --compile-all --reset --network klaythn
+```
+
+#### 실행
+```
+npm run dev
+```
