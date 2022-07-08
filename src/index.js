@@ -37,13 +37,21 @@ const App = {
   handlePassword: async function () {
     this.auth.password = event.target.value;
   },
-
+  // 비밀번호를 가져온다.
   handleLogin: async function () {
-
+    if (this.auth.accessType == 'keystore') {
+      try {
+        const privatekey = cav.klay.accounts.decrypt(this.auth.keystore, this.auth.password).privateKey;
+        this.integrateWallet(privatekey);
+      } catch (e) {
+        $('#message').text('비밀번호가 일치하지 않습니다.');
+      }
+    }
   },
 
   handleLogout: async function () {
-
+    this.removeWallet();
+    location.reload();
   },
 
   generateNumbers: async function () {
@@ -78,19 +86,32 @@ const App = {
   },
 
   integrateWallet: function (privateKey) {
-
+    const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
+    cav.klay.accounts.wallet.add(walletInstance);
+    // 계정이 로그인 된 상태를 계속 유지하기 위해서 사용.
+    sessionStorage.setItem('walletInstance', JSON.stringify(walletInstance));
+    this.changeUI(walletInstance);
   },
 
   reset: function () {
-
+    this.auth = {
+      keystore: '',
+      password: ''
+    };
   },
 
   changeUI: async function (walletInstance) {
-
+    $('#loginModel').model('hide');
+    $('#login').hide();
+    $('#logout').show();
+    $('#address').append('<br />' + '<p>' + '내 계정 주소: ' + walletInstance + '</p>');
   },
 
   removeWallet: function () {
-
+    cav.klay.accounts.wallet.clear();
+    sessionStorage.removeItem('walletInstance');
+    // auth를 초기화 시킨다.
+    this.reset();
   },
 
   showTimer: function () {
