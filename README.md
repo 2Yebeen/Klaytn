@@ -97,3 +97,10 @@ truffle deploy --compile-all --reset --network klaythn
 ```
 npm run dev
 ```
+
+### 요약
+
+클레이튼이 어떤 플랫폼인가
+월렛 아이디 스코프
+간단한 덧셈 게임 만들기
+처리 속도가 아주 빠르고 그 즉시 완결성을 갖는다.
