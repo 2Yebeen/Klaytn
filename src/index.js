@@ -12,7 +12,15 @@ const App = {
   },
 
   start: async function () {
-
+    const walletFromSessrion = sessionStorage.getItem('walletInstance');
+    if (walletFromSessrion) {
+      try {
+        cav.klay.accounts.wallet.add(JSON.parse(walletFromSessrion));
+        this.changeUI(JSON.parse(walletFromSessrion));
+      } catch (e) {
+        sessionStorage.removeItem('walletInstance');
+      }
+    }
   },
 
   handleImport: async function () {
