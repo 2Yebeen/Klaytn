@@ -65,7 +65,16 @@ const App = {
   },
 
   generateNumbers: async function () {
+    // 0 - 1아래의 소수점있는 숫자를 랜덤으로 생성 (*50 : 0~49) + 10
+    var num1 = Math.floor((Math.random() * 50 )+ 10);
+    var num2 = Math.floor((Math.random() * 50 )+ 10);
+    sessionStorage.setItem('result', num1 + num2);
 
+    $('#start').hide();
+    $('#num1').text(num1);
+    $('#num2').text(num2);
+    $('#quastion').show();
+    document.querySelector('#answer').focus();
   },
 
   submitAnswer: async function () {
@@ -145,6 +154,7 @@ const App = {
     $('#loginModel').model('hide');
     $('#login').hide();
     $('#logout').show();
+    $('#game').show();
     $('#address').append('<br />' + '<p>' + '내 계정 주소: ' + walletInstance + '</p>');
     // 잔액을 klay로 변환한다.
     $('#contractBalance').append('<p>' + '이벤트 잔액: ' + cav.utils.fromPad(await this.callContractBalance(), "KLAY") +'KLAY' + '</p>');
