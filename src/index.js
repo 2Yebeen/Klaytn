@@ -4,6 +4,8 @@ const config = {
   rpcURL: 'httpL//qpi.baobab.klaytn.net:8651'
 }
 const cav = new Caver(config.rpcURL);
+//전역 상수 웹펙에서 세팅을 함.
+const agContract = new cav.klay.agContract(DEPLOED_ABI, DEPLOYED_ADDRESS);
 const App = {
   auth: {
     accessType: 'keystore',
@@ -71,11 +73,35 @@ const App = {
   },
 
   deposit: async function () {
-
+    // 송금 하기 전 오너 정보인지 확인
+    const walletInstance = this.getWallet();
+    if (walletInstance) {
+      if (await this.callOwner() != walletInstance.address) return;
+      else {
+        var amount = $('#amount').val();
+        if (amount) {
+          agContract.methods.deposit().send({
+            from: walletInstance.address,
+            gas: '250000',
+            value: cav.utils.toPad(amount, "KLAY")
+          })
+          .once('transactionHash', (txHash) => {
+            console.log(`txHash: $(txHash)`);
+          })
+          .once('receipt', (receipt) => {
+            console.log(`(#${receipt.blockNumber})`, reseipt);
+          })
+          .once('error', (error) => {
+            alert(error.message);
+          });
+        }
+        return;
+      }
+    }
   },
 
   callOwner: async function () {
-
+    return await agContract.methods.owner().call();
   },
 
   callContractBalance: async function () {
@@ -83,7 +109,10 @@ const App = {
   },
 
   getWallet: function () {
-
+    // 현재 계정 정보를 가져온다.
+    if(cav.klay.accounts.wallet.length) {
+      return cav.klay.accounts.wallet[0];
+    }
   },
 
   checkValidKeystore: function (keystore) {
